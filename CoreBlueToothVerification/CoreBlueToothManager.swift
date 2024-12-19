@@ -22,34 +22,21 @@ class PeripheralManager: NSObject, CBPeripheralManagerDelegate {
     func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
         if peripheral.state == .poweredOn {
             print("Peripheral is powered on")
-            setupService()
             startAdvertising()
         } else {
             print("Peripheral state: \(peripheral.state.rawValue)")
         }
     }
 
-    func setupService() {
-        transferCharacteristic = CBMutableCharacteristic(
-            type: CBUUID(string: "180D"),
-            properties: [.read],
-            value: nil,
-            permissions: [.readable]
-        )
-
-        let service = CBMutableService(type: CBUUID(string: "180A"), primary: true)
-        service.characteristics = [transferCharacteristic!]
-
-        peripheralManager?.add(service)
-    }
-
     func startAdvertising() {
         let advertisementData: [String: Any] = [
             CBAdvertisementDataLocalNameKey: "Device",
-            CBAdvertisementDataServiceUUIDsKey: [CBUUID(string: "180A")]
+            CBAdvertisementDataServiceUUIDsKey: [CBUUID(string: "1234")],
+            CBAdvertisementDataManufacturerDataKey: "Hello".data(using: .utf8)!
         ]
+        print(advertisementData)
         peripheralManager?.startAdvertising(advertisementData)
-        peripheralPublisher.send("Peripheral started advertising")
+        peripheralPublisher.send("Peripheral is powered on")
     }
 
     func peripheralManagerDidStartAdvertising(_ peripheral: CBPeripheralManager, error: Error?) {
