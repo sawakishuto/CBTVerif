@@ -31,29 +31,20 @@ class PeripheralManager: NSObject, CBPeripheralManagerDelegate {
         let advertisementData: [String: Any] = [
             CBAdvertisementDataLocalNameKey: "Device",
             CBAdvertisementDataServiceUUIDsKey: [CBUUID(string: "1234")],
-            CBAdvertisementDataManufacturerDataKey: "Hello".data(using: .utf8)!
+            CBAdvertisementDataManufacturerDataKey: "Hello".data(using: .utf8)!,
         ]
         print(advertisementData)
         peripheralManager?.startAdvertising(advertisementData)
         peripheralPublisher.send("Peripheral is powered on")
     }
 
-    func peripheralManagerDidStartAdvertising(_ peripheral: CBPeripheralManager, error: Error?) {
+    func peripheralManagerDidStartAdvertising(
+        _ peripheral: CBPeripheralManager, error: Error?
+    ) {
         if let error = error {
             print("Failed to start advertising: \(error.localizedDescription)")
         } else {
             print("Advertising started successfully.")
-        }
-    }
-
-    func peripheralManager(
-        _ peripheral: CBPeripheralManager, didReceiveRead request: CBATTRequest
-    ) {
-        if request.characteristic.uuid == transferCharacteristic?.uuid {
-            request.value = "UidIs1234".data(using: .utf8)
-            peripheralManager?.respond(to: request, withResult: .success)
-            peripheralPublisher.send("Respond Req")
-        } else {
         }
     }
 }
@@ -78,17 +69,21 @@ class CentralManager: NSObject, CBCentralManagerDelegate {
     }
 
     func startScanning() {
-        centralManager?.scanForPeripherals(withServices:  [CBUUID(string: "1234")], options: nil)
+        centralManager?.scanForPeripherals(
+            withServices: [CBUUID(string: "1234")], options: nil)
     }
-
 
     func centralManager(
         _ central: CBCentralManager, didDiscover peripheral: CBPeripheral,
         advertisementData: [String: Any], rssi RSSI: NSNumber
     ) {
         print("Discovered peripheral: \(peripheral.name ?? "Unknown")")
-        if let manufacturerData = advertisementData[CBAdvertisementDataManufacturerDataKey] as? Data {
-            let dataString = String(data: manufacturerData, encoding: .utf8) ?? "Invalid Data"
+        if let manufacturerData = advertisementData[
+            CBAdvertisementDataManufacturerDataKey] as? Data
+        {
+            let dataString =
+                String(data: manufacturerData, encoding: .utf8)
+                ?? "Invalid Data"
             print("Received data: \(dataString)")
             centralPublisher.send("Received data: \(dataString)")
         } else {
