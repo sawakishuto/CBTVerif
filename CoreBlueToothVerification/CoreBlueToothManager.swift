@@ -11,7 +11,6 @@ import Foundation
 
 class PeripheralManager: NSObject, CBPeripheralManagerDelegate {
     var peripheralManager: CBPeripheralManager!
-    var transferCharacteristic: CBMutableCharacteristic?
     var peripheralPublisher = PassthroughSubject<String, Never>()
 
     override init() {
@@ -53,6 +52,8 @@ class PeripheralManager: NSObject, CBPeripheralManagerDelegate {
         if request.characteristic.uuid == transferCharacteristic?.uuid {
             request.value = "UidIs1234".data(using: .utf8)
             peripheralManager?.respond(to: request, withResult: .success)
+            peripheralPublisher.send("Respond Req")
+        } else {
         }
     }
 }
@@ -77,57 +78,21 @@ class CentralManager: NSObject, CBCentralManagerDelegate {
     }
 
     func startScanning() {
-        centralManager?.scanForPeripherals(withServices: [CBUUID(string: "180A")], options: nil)
+        centralManager?.scanForPeripherals(withServices:  [CBUUID(string: "1234")], options: nil)
     }
+
 
     func centralManager(
         _ central: CBCentralManager, didDiscover peripheral: CBPeripheral,
         advertisementData: [String: Any], rssi RSSI: NSNumber
     ) {
-        let deviceName = peripheral.name ?? "Unknown Device"
-        print("Discovered peripheral: \(deviceName)")
-        centralPublisher.send("Discovered peripheral: \(deviceName)")
-    }
-
-    func peripheral(
-        _ peripheral: CBPeripheral, didDiscoverServices error: Error?
-    ) {
-        if let services = peripheral.services {
-            for service in services {
-                print("Discovered Service: \(service.uuid)")
-                centralPublisher.send("Discovered Service: \(service.uuid)")
-                if service.uuid == CBUUID(string: "180A") {
-                    peripheral.discoverCharacteristics([CBUUID(string: "180D")], for: service)
-
-                }
-            }
-        }
-    }
-
-    func peripheral(
-        _ peripheral: CBPeripheral,
-        didDiscoverCharacteristicsFor service: CBService, error: Error?
-    ) {
-        if let characteristics = service.characteristics {
-            for characteristic in characteristics {
-                if characteristic.uuid == CBUUID(string: "180D") {
-                    print("Discovered Characteristic: \(characteristic.uuid)")
-                    centralPublisher.send("Discovered Characteristics")
-                    peripheral.readValue(for: characteristic)
-                }
-            }
-        }
-    }
-
-    func peripheral(
-        _ peripheral: CBPeripheral,
-        didUpdateValueFor characteristic: CBCharacteristic, error: Error?
-    ) {
-        centralPublisher.send("readValue")
-        if let value = characteristic.value {
-            let receivedString = String(data: value, encoding: .utf8) ?? "Invalid data"
-            print("Received from Peripheral: \(receivedString)")
-            centralPublisher.send(receivedString)
+        print("Discovered peripheral: \(peripheral.name ?? "Unknown")")
+        if let manufacturerData = advertisementData[CBAdvertisementDataManufacturerDataKey] as? Data {
+            let dataString = String(data: manufacturerData, encoding: .utf8) ?? "Invalid Data"
+            print("Received data: \(dataString)")
+            centralPublisher.send("Received data: \(dataString)")
+        } else {
+            centralPublisher.send("manufacturerData is invalid data")
         }
     }
 }
