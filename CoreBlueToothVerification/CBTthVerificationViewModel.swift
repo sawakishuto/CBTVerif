@@ -37,5 +37,9 @@ class CBTthVerificationViewModel: ObservableObject {
         .store(in: &cancellable)
     }
 
+    func checkConnectedService() {
+//        let connection =  centralManager.listConnectedPeripherals()
+    }
+
 
 }

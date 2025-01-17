@@ -31,13 +31,13 @@ class PeripheralManager: NSObject, CBPeripheralManagerDelegate {
 
     func setupService() {
         transferCharacteristic = CBMutableCharacteristic(
-            type: CBUUID(string: "180D"),
+            type: CBUUID(string: "180C"),
             properties: [.read],
             value: nil,
             permissions: [.readable]
         )
 
-        let service = CBMutableService(type: CBUUID(string: "180A"), primary: true)
+        let service = CBMutableService(type: CBUUID(string: "180B"), primary: true)
         service.characteristics = [transferCharacteristic!]
 
         peripheralManager?.add(service)
@@ -49,7 +49,6 @@ class PeripheralManager: NSObject, CBPeripheralManagerDelegate {
             CBAdvertisementDataServiceUUIDsKey: [CBUUID(string: "180A")]
         ]
         peripheralManager?.startAdvertising(advertisementData)
-        peripheralPublisher.send("Peripheral started advertising")
     }
 
     func peripheralManagerDidStartAdvertising(_ peripheral: CBPeripheralManager, error: Error?) {
@@ -57,6 +56,7 @@ class PeripheralManager: NSObject, CBPeripheralManagerDelegate {
             print("Failed to start advertising: \(error.localizedDescription)")
         } else {
             print("Advertising started successfully.")
+            peripheralPublisher.send("Peripheral started advertising")
         }
     }
 
@@ -70,9 +70,10 @@ class PeripheralManager: NSObject, CBPeripheralManagerDelegate {
     }
 }
 
-class CentralManager: NSObject, CBCentralManagerDelegate {
+class CentralManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     var centralManager: CBCentralManager?
     var centralPublisher = PassthroughSubject<String, Never>()
+    var discoveredPeripheral: CBPeripheral? // Peripheralを保持するプロパティ
 
     override init() {
         super.init()
@@ -97,21 +98,31 @@ class CentralManager: NSObject, CBCentralManagerDelegate {
         _ central: CBCentralManager, didDiscover peripheral: CBPeripheral,
         advertisementData: [String: Any], rssi RSSI: NSNumber
     ) {
-        let deviceName = peripheral.name ?? "Unknown Device"
-        print("Discovered peripheral: \(deviceName)")
-        centralPublisher.send("Discovered peripheral: \(deviceName)")
+        if RSSI.intValue > -120 {
+            let deviceName = peripheral.name ?? "Unknown Device"
+            print("Discovered peripheral: \(deviceName)")
+            centralManager?.stopScan()
+            discoveredPeripheral = peripheral
+            discoveredPeripheral?.delegate = self // delegateを設定
+            centralManager?.connect(peripheral)
+            centralPublisher.send("connection complete peripheral \(deviceName)")
+        }
     }
+
+    func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
+        print("Connected to peripheral: \(peripheral.name ?? "Unknown")")
+        peripheral.discoverServices([CBUUID(string: "180B")])
+    }
+
 
     func peripheral(
         _ peripheral: CBPeripheral, didDiscoverServices error: Error?
     ) {
         if let services = peripheral.services {
             for service in services {
-                print("Discovered Service: \(service.uuid)")
                 centralPublisher.send("Discovered Service: \(service.uuid)")
-                if service.uuid == CBUUID(string: "180A") {
-                    peripheral.discoverCharacteristics([CBUUID(string: "180D")], for: service)
-
+                if service.uuid == CBUUID(string: "180B") {
+                    peripheral.discoverCharacteristics([CBUUID(string: "180C")], for: service)
                 }
             }
         }
@@ -123,7 +134,7 @@ class CentralManager: NSObject, CBCentralManagerDelegate {
     ) {
         if let characteristics = service.characteristics {
             for characteristic in characteristics {
-                if characteristic.uuid == CBUUID(string: "180D") {
+                if characteristic.uuid == CBUUID(string: "180C") {
                     print("Discovered Characteristic: \(characteristic.uuid)")
                     centralPublisher.send("Discovered Characteristics")
                     peripheral.readValue(for: characteristic)
@@ -144,3 +155,5 @@ class CentralManager: NSObject, CBCentralManagerDelegate {
         }
     }
 }
+
+

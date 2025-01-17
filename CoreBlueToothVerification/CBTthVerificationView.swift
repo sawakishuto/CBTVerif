@@ -20,9 +20,9 @@ struct CBTthVerificationView: View {
             }
             .backgroundStyle(.gray)
             Button {
-                print(cBTVM.RecievedData)
+                cBTVM.checkConnectedService()
             } label: {
-                Text("データを更新する")
+                Text("現在のコネクションを確認")
             }
 
         }

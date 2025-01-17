@@ -29,9 +29,22 @@
 		08D813FD2D128FEC00C2CD96 /* CoreBlueToothVerificationUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CoreBlueToothVerificationUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		0891BD4C2D141B6D00AD05A8 /* Exceptions for "CoreBlueToothVerification" folder in "CoreBlueToothVerification" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 08D813E22D128FE800C2CD96 /* CoreBlueToothVerification */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		08D813E52D128FE800C2CD96 /* CoreBlueToothVerification */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				0891BD4C2D141B6D00AD05A8 /* Exceptions for "CoreBlueToothVerification" folder in "CoreBlueToothVerification" target */,
+			);
 			path = CoreBlueToothVerification;
 			sourceTree = "<group>";
 		};
@@ -399,9 +412,9 @@
 				DEVELOPMENT_TEAM = 5285K4Z956;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = CoreBlueToothVerification/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/CoreBlueToothVerification/Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "";
-				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "BlueToothの使用します";
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "BlueTooth使用します";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -431,9 +444,9 @@
 				DEVELOPMENT_TEAM = 5285K4Z956;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = CoreBlueToothVerification/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/CoreBlueToothVerification/Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "";
-				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "BlueToothの使用します";
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "BlueTooth使用します";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
