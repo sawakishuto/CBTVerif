@@ -11,7 +11,6 @@ import Foundation
 
 class PeripheralManager: NSObject, CBPeripheralManagerDelegate {
     var peripheralManager: CBPeripheralManager!
-    var transferCharacteristic: CBMutableCharacteristic?
     var peripheralPublisher = PassthroughSubject<String, Never>()
 
     override init() {
@@ -22,7 +21,6 @@ class PeripheralManager: NSObject, CBPeripheralManagerDelegate {
     func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
         if peripheral.state == .poweredOn {
             print("Peripheral is powered on")
-            setupService()
             startAdvertising()
         } else {
             print("Peripheral state: \(peripheral.state.rawValue)")
@@ -46,26 +44,21 @@ class PeripheralManager: NSObject, CBPeripheralManagerDelegate {
     func startAdvertising() {
         let advertisementData: [String: Any] = [
             CBAdvertisementDataLocalNameKey: "Device",
-            CBAdvertisementDataServiceUUIDsKey: [CBUUID(string: "180A")]
+            CBAdvertisementDataServiceUUIDsKey: [CBUUID(string: "1234")],
+            CBAdvertisementDataManufacturerDataKey: "Hello".data(using: .utf8)!,
         ]
+        print(advertisementData)
         peripheralManager?.startAdvertising(advertisementData)
     }
 
-    func peripheralManagerDidStartAdvertising(_ peripheral: CBPeripheralManager, error: Error?) {
+    func peripheralManagerDidStartAdvertising(
+        _ peripheral: CBPeripheralManager, error: Error?
+    ) {
         if let error = error {
             print("Failed to start advertising: \(error.localizedDescription)")
         } else {
             print("Advertising started successfully.")
             peripheralPublisher.send("Peripheral started advertising")
-        }
-    }
-
-    func peripheralManager(
-        _ peripheral: CBPeripheralManager, didReceiveRead request: CBATTRequest
-    ) {
-        if request.characteristic.uuid == transferCharacteristic?.uuid {
-            request.value = "UidIs1234".data(using: .utf8)
-            peripheralManager?.respond(to: request, withResult: .success)
         }
     }
 }
@@ -91,7 +84,8 @@ class CentralManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     }
 
     func startScanning() {
-        centralManager?.scanForPeripherals(withServices: [CBUUID(string: "180A")], options: nil)
+        centralManager?.scanForPeripherals(
+            withServices: [CBUUID(string: "1234")], options: nil)
     }
 
     func centralManager(
